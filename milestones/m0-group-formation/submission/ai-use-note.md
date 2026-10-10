@@ -1,4 +1,4 @@
-
+# AI Use Note
 - **Whether AI tools were used to draft the group plan**
   - AI was used to help add bolding and headings for the markdown documents
 - **What the group verified independently**
