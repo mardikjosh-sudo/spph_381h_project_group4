@@ -6,3 +6,4 @@
 - **Decision record:** Decisions are discussed and announced on Instagram, then one member adds each dated decision to our GitHub workspace (README or `decisions.md`). Another member confirms the entry.
 
 
+

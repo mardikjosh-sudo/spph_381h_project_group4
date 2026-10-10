@@ -4,3 +4,4 @@
 - **What the group verified independently**
   - Documents were visually checked to make sure the bolding and heading was correct
 - **What the group will not outsource to AI**
+
