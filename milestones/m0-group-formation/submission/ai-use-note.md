@@ -7,4 +7,4 @@
 - The group independently tested the repository, Codespace access, and project scope. 
 
 **What the group will not outsource to AI**
-- The group will not outsource source verification, interpretation of results, privacy decisions, or final approval of submitted claims to AI.
+- We will not rely on AI to select or verify sources, interpret findings about workplace noise and hearing, decide what information is safe to share, or approve our final submission. Our group will check and make those decisions.
