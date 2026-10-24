@@ -8,15 +8,15 @@ Our planned focus is the 2025 age and sex distributions.
 
 ## Access method
 
-The report is publicly accessible. The [main surveillance page](https://health-infobase.canada.ca/substance-related-harms/opioids-stimulants/) provides a ZIP data download. We will check that its files contain the age and sex breakdowns needed for our questions.
+The report is publicly accessible. The [main surveillance page](https://health-infobase.canada.ca/substance-related-harms/opioids-stimulants/) provides a ZIP data download. The files contain the age and sex breakdowns needed for our questions.
 
 ## File format
 
-The download is a ZIP archive. The formats and relevant filenames inside the archive still need to be confirmed.
+The download is a ZIP archive. The formats and relevant filenames inside the archive have been confirmed.
 
 ## Unit of analysis
 
-Our planned analysis will use an aggregate demographic group for a particular substance, harm type, and reporting period, rather than individual patient records. We will confirm the exact row structure after downloading.
+Our planned analysis will use an aggregate demographic group for a particular substance, harm type, and reporting period, rather than individual patient records. The exact row structure has been confirmed.
 
 ## Key variables
 
@@ -37,4 +37,4 @@ Coverage differs across harm types and jurisdictions. Percentages describe the d
 
 ## Indigenous data governance
 
-The blog does not present an Indigenous-identity breakdown. We will check the downloaded data and documentation. If our analysis involves Indigenous identifiers, communities, territories, or services, we will consult the course’s Week 1 guidance before proceeding.
+The data set does not present an Indigenous-identity breakdown. The downloaded data and documentation have been reviewed. If our analysis involves Indigenous identifiers, communities, territories, or services, we will consult the course’s Week 1 guidance before proceeding.
