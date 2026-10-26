@@ -2,17 +2,17 @@
 
 ## Data source and steward
 
-Our source is the Public Health Agency of Canada’s (PHAC) [Age and Sex Distribution of Opioid- and Stimulant-Related Harms in Canada](https://health-infobase.canada.ca/substances/harms/age-sex-distribution-opioids-stimulants/).
-PHAC publishes the surveillance results. Hospitalization and emergency department data come from the Canadian Institute for Health Information (CIHI). Mortality and emergency medical services data come from the national harms surveillance system.
-Our planned focus is the 2025 age and sex distributions.
+Our source is the Public Health Agency of Canada’s (PHAC) Opioid- and Stimulant-related Harms in Canada dataset. PHAC publishes the national surveillance data using information supplied by provincial and territorial partners, including offices of Chief Coroners and Chief Medical Examiners for deaths. Our project examines apparent opioid toxicity deaths, not hospitalizations, emergency department visits, or stimulant-related harms.
+
+Source: Government of Canada dataset record. The release in our repository was last updated September 22, 2026; we accessed it October 26, 2026.
 
 ## Access method
 
-The report is publicly accessible. The [main surveillance page](https://health-infobase.canada.ca/substance-related-harms/opioids-stimulants/) provides a ZIP data download. The files contain the age and sex breakdowns needed for our questions.
+The report is publicly accessible. The [main surveillance page](https://health-infobase.canada.ca/substance-related-harms/opioids-stimulants/) provides a ZIP data download. We downloaded the September 2026 release and placed SubstanceHarmsData.csv at data/SubstanceHarmsData.csv in our group repository. Accessed October 26, 2026. The dataset uses the Open Government Licence – Canada.
 
 ## File format
 
-The download is a ZIP archive. The formats and relevant filenames inside the archive have been confirmed.
+The download is a ZIP archive containing a CSV file and a README. The CSV contains public, aggregate surveillance values rather than individual records.
 
 ## Unit of analysis
 
