@@ -1,32 +1,21 @@
-## AI Use Note
+# AI-Use Note
 
-**Prompt 1:**
-Please outline the key variables within this dataset (referring to our main csv dataset).
+## Audit trail
 
-**Summary of output:**
-The AI listed the main columns in the PHAC Opioid and Stimulant related Harms in Canada dataset and described what each represents. These included the reporting region (province, territory, or Canada overall), the year, the type of harm (e.g., opioid toxicity deaths), the sex breakdown (male, female, total), and the measure reported (counts and crude rates per 100,000 population). The output also noted that some values are suppressed or not reported for small regions. This informed which columns we plan to keep in the cleaned table (crude rate, male rate, female rate) and why we may add a column explaining missing values.
+# AI prompt: Please outline the key variables within this dataset (referring to our main csv dataset).
+# Verified: Opened the CSV in a web-based CSV viewer and checked the columns and rows against the AI's list of variables and descriptions (region, year, type of harm, sex, counts and crude rates, suppressed values).
 
-**Verification:**
-We opened the CSV file in a web-based CSV viewer and inspected the columns and rows to confirm that the variables and descriptions the AI gave matched what is actually in the file.
+# AI prompt: Summarise the government report on the dataset, and flag parts that are related to the limitations of the dataset / study.
+# Verified: Used Ctrl/Cmd+F to find the matching section of the PHAC report for each flagged limitation (crude rates, suppressed small counts, undercounting of recent years, incomplete 2026 data, no causal claims) and read it ourselves to confirm the AI's interpretation.
 
----
+# AI prompt: Please make this section of our proposal more concise, improve its clarity, and refine the phrasing.
+# Verified: Compared each AI-edited passage against our original text to confirm the meaning was unchanged and no claims, figures, or details were added or dropped.
 
-**Prompt 2:**
-Summarise the government report on the dataset, and flag parts that are related to the limitations of the dataset / study.
+## What AI helped with
+We used Claude / Copilot to outline the variables in the PHAC opioid and stimulant harms dataset, summarise the PHAC technical notes and flag dataset limitations, and tighten the wording of our proposal sections. It did not add data, findings, or sources.
 
-**Summary of output:**
-The AI gave a short summary of the PHAC technical notes covering how the data are collected and reported, and flagged points relevant to limitations. These were: rates are crude and not age-adjusted; small counts are suppressed in some regions; recent years may be undercounted because deaths are only counted once investigations are complete (which can take months); 2026 data are incomplete; and the data are descriptive and cannot support causal claims. These points form the basis of the "Known Limitations" section of our proposal.
+## What I changed
+We kept only the edits that matched our intended meaning and revised or rejected any that altered it. All substantive content (research questions, data source, planned outputs, and limitations) was written by our group.
 
-**Verification:**
-For each point the AI raised, we used Ctrl/Cmd+F to find the matching section of the government report, then read that section ourselves to confirm the AI's interpretation was accurate and consistent with the source.
-
----
-
-**Prompt 3:**
-Please make this section of our proposal more concise, improve its clarity, and refine the phrasing.
-
-**Summary of output:**
-The AI returned edited versions of sections of our written proposal with tighter wording, clearer sentence structure, and smoother phrasing. It shortened longer sentences, removed repetition, and made the descriptions of the audience, research questions, planned outputs, and limitations easier to read. It did not add new data, findings, or sources.
-
-**Verification:**
-We compared each AI-edited passage against our original text to confirm that the meaning was unchanged and that no claims, figures, or details had been added or dropped. We kept only the edits that accurately reflected our intended content, and revised or rejected any that altered the meaning. All substantive content (the research questions, data source, planned outputs, and limitations) was written by our group and checked against the PHAC documentation.
+## How I verified the result
+We checked the AI's variable descriptions against the CSV file itself and its limitation points against the PHAC documentation. We compared every edited passage against our original text to confirm nothing was added or lost.
