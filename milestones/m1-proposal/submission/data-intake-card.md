@@ -1,6 +1,6 @@
 # Data Intake Card
 
-## Data source and steward
+## Dataset, source and steward
 
 Our source is the Public Health Agency of Canada’s (PHAC) Opioid- and Stimulant-related Harms in Canada dataset. PHAC publishes the national surveillance data using information supplied by provincial and territorial partners, including offices of Chief Coroners and Chief Medical Examiners for deaths. Our project examines apparent opioid toxicity deaths, not hospitalizations, emergency department visits, or stimulant-related harms.
 
