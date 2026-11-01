@@ -1,0 +1,5 @@
+Measure,Region_year_N,Numeric_N,Missing_N,Missing_percent,Suppressed_N,Unavailable_N,Zero_denominator_N
+overall,140,134,6,4.3,4,2,0
+male,140,115,25,17.9,23,2,0
+female,140,115,25,17.9,23,2,0
+ratio,140,111,29,20.7,23,2,4
