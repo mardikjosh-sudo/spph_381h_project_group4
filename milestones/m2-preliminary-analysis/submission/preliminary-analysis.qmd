@@ -1,0 +1,477 @@
+---
+title: "M2: Preliminary Analysis of Reported Opioid Toxicity Death Rates"
+---
+
+## Questions and audience
+
+For provincial and regional public-health readers, we examine how reported
+crude opioid toxicity death rates vary across Canadian jurisdictions and
+years, and whether the male-to-female rate ratio varies. This preliminary
+analysis follows Group 4's PHAC project proposal, using 2016-2025 data.
+
+## Source and analytic sample
+
+The source is the fixed public aggregate PHAC file at
+`data/SubstanceHarmsData.csv`, identified in the group's intake card as
+the September 22, 2026 release, accessed October 26, 2026.
+
+One analytic row represents a region-year, not a person or death.
+We select Opioids, Deaths, By year, 2016-2025, and Crude rate, retaining
+overall rates and the reported male and female sex categories.
+Quarterly data, partial 2026 data, other harms, and stimulants are excluded.
+Canada is a separate reference series, not an additional province.
+
+```{r}
+#| label: prepare-region-year-data
+# AI prompt: Read the PHAC CSV as text using repository-relative paths.
+# Select annual opioid-death crude rates for 2016-2025 and reshape overall,
+# male, and female values into unique region-years. Preserve zeroes and
+# suppression labels, calculate ratios only with a positive female denominator,
+# and flag partial-year coverage and the specified 2025 reporting changes.
+# Verified: Checked source filters, unique keys, numeric values, zeroes, and raw suppression labels.
+
+library(readr)
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(ggplot2)
+
+roots <- c(".", "../../..")
+repo_root <- roots[file.exists(file.path(roots, "data/SubstanceHarmsData.csv"))][1]
+
+if (is.na(repo_root)) stop("Cannot find data/SubstanceHarmsData.csv.")
+
+out_dir <- file.path(repo_root, "milestones/m2-preliminary-analysis/submission")
+dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+
+source_df <- read_csv(
+  file.path(repo_root, "data/SubstanceHarmsData.csv"),
+  col_types = cols(.default = col_character()),
+  na = character()
+)
+
+selected <- source_df |>
+  filter(
+    Substance == "Opioids",
+    Source == "Deaths",
+    Time_Period == "By year",
+    Year_Quarter %in% as.character(2016:2025),
+    Unit == "Crude rate",
+    (Specific_Measure == "Overall numbers" & Disaggregator == "") |
+      (Specific_Measure == "Sex" & Disaggregator %in% c("Male", "Female"))
+  ) |>
+  transmute(
+    Region,
+    Year = as.integer(Year_Quarter),
+    measure = case_when(
+      Specific_Measure == "Overall numbers" ~ "overall",
+      Disaggregator == "Male" ~ "male",
+      TRUE ~ "female"
+    ),
+    raw = trimws(Value)
+  )
+
+stopifnot(!anyDuplicated(selected[c("Region", "Year", "measure")]))
+
+is_numeric <- grepl("^[0-9]+([.][0-9]+)?$", selected$raw)
+
+selected$rate <- NA_real_
+selected$rate[is_numeric] <- as.numeric(selected$raw[is_numeric])
+
+selected$status <- case_when(
+  is_numeric ~ "Reported",
+  selected$raw == "Suppr." ~ "Suppressed",
+  selected$raw == "n/a" ~ "Unavailable",
+  TRUE ~ "Unexpected"
+)
+
+stopifnot(!any(selected$status == "Unexpected"))
+
+panel <- selected |>
+  pivot_wider(
+    names_from = measure,
+    values_from = c(raw, rate, status),
+    names_glue = "{measure}_{.value}"
+  ) |>
+  mutate(
+    partial_year = Region == "Nunavut" & Year == 2023,
+    definition_change =
+      Region %in% c("British Columbia", "Quebec", "Canada") & Year == 2025,
+    ratio_rate = if_else(
+      !is.na(male_rate) & !is.na(female_rate) & female_rate > 0,
+      male_rate / female_rate,
+      NA_real_
+    ),
+    ratio_status = case_when(
+      male_status == "Suppressed" |
+        female_status == "Suppressed" ~ "Suppressed",
+      male_status == "Unavailable" |
+        female_status == "Unavailable" ~ "Unavailable",
+      female_rate == 0 ~ "Zero denominator",
+      !is.na(ratio_rate) ~ "Reported",
+      TRUE ~ "Unexpected"
+    )
+  ) |>
+  arrange(Region, Year)
+
+stopifnot(!anyDuplicated(panel[c("Region", "Year")]))
+stopifnot(nrow(panel) == 140, n_distinct(panel$Region) == 14)
+
+kable(
+  data.frame(
+    Step = c(
+      "Source CSV rows",
+      "Selected rate records",
+      "Unique region-years"
+    ),
+    N = c(nrow(source_df), nrow(selected), nrow(panel))
+  ),
+  caption = "Selection flow: three rate records become one region-year."
+)
+```
+
+## Missingness before exclusions
+
+Suppression and unavailability are kept distinct. Reported zeroes stay zero;
+they are not missing. A ratio requires two reported rates and a positive
+female rate. Ratios use rounded published rates and are approximate.
+
+The denominator below is all 140 selected region-years, including records
+later excluded from the full-year summary. Missingness is not assumed random.
+
+```{r}
+#| label: missingness-and-export
+# AI prompt: Before exclusions, summarize availability of overall, male, female,
+# and ratio values across all selected region-years. Include numeric and missing
+# counts, missing percentages, and separate counts for suppression, unavailable
+# values, and zero denominators. Display and export missingness-summary.csv.
+# Verified: Compared all availability categories and percentages with separate base-R counts and the exported CSV.
+
+measures <- c("overall", "male", "female", "ratio")
+
+missingness <- bind_rows(lapply(measures, function(m) {
+  v <- panel[[paste0(m, "_rate")]]
+  s <- panel[[paste0(m, "_status")]]
+
+  data.frame(
+    Measure = m,
+    Region_year_N = nrow(panel),
+    Numeric_N = sum(!is.na(v)),
+    Missing_N = sum(is.na(v)),
+    Missing_percent = round(100 * mean(is.na(v)), 1),
+    Suppressed_N = sum(s == "Suppressed"),
+    Unavailable_N = sum(s == "Unavailable"),
+    Zero_denominator_N = sum(s == "Zero denominator")
+  )
+}))
+
+write_csv(missingness, file.path(out_dir, "missingness-summary.csv"))
+
+kable(
+  missingness,
+  caption = "Availability before summary exclusions; N counts region-years."
+)
+```
+
+## Summary eligibility and exclusions
+
+Nunavut 2023 is retained in the availability audit but excluded from the
+summary because reporting covers only part of that year. To avoid pooling
+the 2025 reporting changes with earlier definitions, the overall and
+sex-specific summary for BC, Quebec, and Canada uses 2016-2024.
+
+These three 2025 rows remain in the availability audit. Other jurisdictions
+retain 2025. This is a conservative summary convention, not a claim that
+all remaining years and jurisdictions have identical ascertainment.
+
+```{r}
+#| label: summary-eligibility
+# AI prompt: Create a summary dataset excluding partial-year Nunavut 2023 and
+# the flagged 2025 records for BC, Quebec, and Canada. Retain the original panel
+# for the availability audit and display the number excluded for each reason
+# alongside the number of remaining region-years.
+# Verified: Checked Nunavut 2023 and the three flagged 2025 rows against PHAC notes and the group's M1 plan.
+
+summary_df <- panel |>
+  filter(!partial_year, !definition_change)
+
+kable(
+  data.frame(
+    Step = c(
+      "Selected region-years",
+      "Partial-year exclusion",
+      "2025 comparability exclusions",
+      "Summary-eligible region-years"
+    ),
+    N = c(
+      nrow(panel),
+      sum(panel$partial_year),
+      sum(panel$definition_change),
+      nrow(summary_df)
+    )
+  ),
+  caption = "Excluded rows are retained in the underlying panel and availability audit."
+)
+```
+
+## Table 1: descriptive summary of available annual rates
+
+This aggregate-data Table 1 reports eligible years, available numeric years,
+missing years, and mean (sample SD) by region and measure. It describes
+variation across available years, not individual people.
+
+Rates are per 100,000 population; the ratio is unitless. Mean annual rates
+are arithmetic summaries, not pooled-period mortality rates. Canada uses
+its own PHAC series; it is never calculated by averaging provincial rates.
+Different availability and summary windows limit comparisons between rows.
+
+```{r}
+#| label: table1-and-export
+# AI prompt: Summarize each region and measure using eligible-year N, numeric N,
+# missing N, and mean (sample SD) across available annual values. Handle groups
+# with zero or one numeric value explicitly, round summaries to two decimals,
+# and display and export the same table as table1.csv.
+# Verified: Checked numeric-year N, means, and sample SDs with independent base-R summaries and CSV read-back.
+
+mean_sd <- function(x) {
+  x <- x[!is.na(x)]
+
+  if (!length(x)) return("Not available")
+
+  if (length(x) == 1) {
+    return(sprintf("%.2f (SD unavailable)", x))
+  }
+
+  sprintf("%.2f (%.2f)", mean(x), sd(x))
+}
+
+table1 <- summary_df |>
+  select(Region, Year, all_of(paste0(measures, "_rate"))) |>
+  pivot_longer(
+    ends_with("_rate"),
+    names_to = "Measure",
+    values_to = "Rate"
+  ) |>
+  mutate(Measure = sub("_rate$", "", Measure)) |>
+  group_by(Region, Measure) |>
+  summarise(
+    Eligible_year_N = n(),
+    Numeric_N = sum(!is.na(Rate)),
+    Missing_N = sum(is.na(Rate)),
+    Mean_SD = mean_sd(Rate),
+    .groups = "drop"
+  )
+
+write_csv(table1, file.path(out_dir, "table1.csv"))
+
+kable(
+  table1,
+  caption = "Table 1. Available annual-rate summaries; N counts years, not deaths."
+)
+```
+
+## Preliminary evidence on change
+
+The table below compares 2016 with 2024, before the flagged 2025 changes.
+Source labels remain visible instead of being replaced by zero.
+
+```{r}
+#| label: endpoint-comparison
+# AI prompt: Create a side-by-side table of each region's published overall
+# crude rate in 2016 and 2024. Preserve the original suppression and unavailable
+# labels, and explain that these endpoints do not describe the full trajectory.
+# Verified: Compared the displayed cells directly with the source CSV, including suppressed and unavailable labels.
+
+endpoints <- panel |>
+  filter(Year %in% c(2016, 2024)) |>
+  select(Region, Year, overall_raw) |>
+  pivot_wider(
+    names_from = Year,
+    values_from = overall_raw,
+    names_prefix = "Rate_"
+  )
+
+kable(
+  endpoints,
+  caption = "Published overall crude rates per 100,000; two endpoints do not show the full trajectory."
+)
+```
+
+In PHAC's Canada series, the reported overall rate is 7.8 in 2016 and 16.2
+in 2024. This does not imply a steady increase in every intervening year.
+For the secondary question, Table 1 summarizes defined annual male-to-female
+ratios; unavailable ratios do not imply equal rates.
+
+## Figure 1: annual reported crude death rates
+
+Each panel shows a province or territory in blue and PHAC's Canada rate in
+grey. Nunavut 2023 is omitted from the full-year plot. Triangles identify
+the 2025 reporting cautions for BC, Quebec, and Canada; their 2025 points
+are disconnected from earlier lines. Other 2025 observations remain in the
+plot. The panels use the same zero-based vertical scale.
+
+```{r}
+#| label: figure-overall-rates
+#| fig-width: 10
+#| fig-height: 11
+#| fig-cap: "Annual published crude death rates per 100,000. Blue: jurisdiction; grey: PHAC Canada reference. Gaps preserve suppressed, unavailable, or partial-year data. Triangles mark 2025 reporting cautions; recent data may be revised."
+# AI prompt: Follow our M1 plan with one panel per province or territory,
+# blue annual crude-rate trends, and a grey PHAC Canada reference. Preserve gaps,
+# omit partial-year Nunavut 2023, and show flagged 2025 values as disconnected
+# triangles. Use common zero-based axes and explain colours and markers.
+# Verified: Checked plotted values against source rates and confirmed partial-year omissions and disconnected caution points.
+
+plot_panel <- panel |>
+  mutate(
+    plot_rate = if_else(partial_year, NA_real_, overall_rate),
+    line_rate = if_else(definition_change, NA_real_, plot_rate),
+    plot_ratio = if_else(partial_year, NA_real_, ratio_rate),
+    line_ratio = if_else(definition_change, NA_real_, plot_ratio)
+  )
+
+jurisdictions <- plot_panel |>
+  filter(Region != "Canada")
+
+canada_reference <- plot_panel |>
+  filter(Region == "Canada") |>
+  select(-Region)
+
+ggplot(jurisdictions, aes(x = Year)) +
+  geom_line(
+    data = canada_reference,
+    aes(y = line_rate),
+    colour = "grey65",
+    linewidth = 0.5,
+    na.rm = TRUE
+  ) +
+  geom_point(
+    data = canada_reference,
+    aes(y = plot_rate, shape = definition_change),
+    colour = "grey65",
+    size = 1,
+    na.rm = TRUE
+  ) +
+  geom_line(
+    aes(y = line_rate),
+    colour = "#0072B2",
+    linewidth = 0.6,
+    na.rm = TRUE
+  ) +
+  geom_point(
+    aes(y = plot_rate, shape = definition_change),
+    colour = "#0072B2",
+    size = 1.6,
+    na.rm = TRUE
+  ) +
+  facet_wrap(~Region, ncol = 3) +
+  scale_shape_manual(
+    values = c("FALSE" = 16, "TRUE" = 17),
+    labels = c("Other years", "2025 reporting caution")
+  ) +
+  scale_x_continuous(breaks = c(2016, 2019, 2022, 2025)) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.07))
+  ) +
+  labs(
+    x = "Year",
+    y = "Reported crude deaths per 100,000",
+    shape = NULL
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(size = 9)
+  )
+```
+
+## Figure 2: male-to-female rate ratios
+
+A ratio above 1 means the reported male rate is higher than the female
+rate. Ratios are undefined when either rate is suppressed or unavailable,
+or the female rate is zero. Prince Edward Island and Nunavut have no
+defined ratios in this release. Flagged 2025 points are separated here
+as a conservative reporting caution, too.
+
+```{r}
+#| label: figure-sex-ratios
+#| fig-width: 10
+#| fig-height: 11
+#| fig-cap: "Male-to-female crude-rate ratios calculated from rounded published rates. The dashed line marks equal reported rates. Gaps and absent ratios do not imply equality. Reported sex categories are not gender identity."
+# AI prompt: Plot annual male-to-female rate ratios by province or territory
+# using common zero-based axes and a dashed reference at 1. Preserve gaps and
+# disconnected flagged 2025 points, label panels with no defined ratios, and
+# explain that missing ratios do not imply equality or describe gender identity.
+# Verified: Checked ratios against male and female rates, positive denominators, missing-data gaps, and empty-panel labels.
+
+no_ratio <- jurisdictions |>
+  group_by(Region) |>
+  summarise(
+    no_values = all(is.na(plot_ratio)),
+    .groups = "drop"
+  ) |>
+  filter(no_values)
+
+ggplot(jurisdictions, aes(x = Year)) +
+  geom_hline(
+    yintercept = 1,
+    linetype = "dashed",
+    colour = "grey55"
+  ) +
+  geom_line(
+    aes(y = line_ratio),
+    colour = "#0072B2",
+    linewidth = 0.6,
+    na.rm = TRUE
+  ) +
+  geom_point(
+    aes(y = plot_ratio, shape = definition_change),
+    colour = "#0072B2",
+    size = 1.6,
+    na.rm = TRUE
+  ) +
+  geom_text(
+    data = no_ratio,
+    aes(x = 2020.5, y = 0.5),
+    label = "No defined ratio",
+    inherit.aes = FALSE,
+    size = 3
+  ) +
+  facet_wrap(~Region, ncol = 3) +
+  scale_shape_manual(
+    values = c("FALSE" = 16, "TRUE" = 17),
+    labels = c("Other years", "2025 reporting caution")
+  ) +
+  scale_x_continuous(breaks = c(2016, 2019, 2022, 2025)) +
+  scale_y_continuous(
+    limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.07))
+  ) +
+  labs(
+    x = "Year",
+    y = "Male-to-female rate ratio",
+    shape = NULL
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(size = 9)
+  )
+```
+
+## Methods, limitations, and stewardship
+
+The analysis is descriptive and non-causal. We use PHAC's published crude
+rates without age standardization, imputation, or hypothesis testing.
+Age structure, small populations, varying reporting coverage, preliminary
+investigations, and definition changes affect comparability.
+
+Reported sex categories should not be equated with gender identity.
+We preserve suppression and do not reconstruct suppressed counts or
+identify people. These results can support further descriptive
+investigation, but do not identify causes or establish which policy
+response would be effective.
+
+Source: [PHAC surveillance release](https://health-infobase.canada.ca/substance-related-harms/opioids-stimulants/).
+
+Coverage and reporting cautions: [PHAC technical notes](https://health-infobase.canada.ca/substance-related-harms/opioids-stimulants/technical-notes.html).
