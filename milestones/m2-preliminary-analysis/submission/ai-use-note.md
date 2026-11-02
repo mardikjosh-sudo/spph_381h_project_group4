@@ -36,11 +36,11 @@ Checked numeric-year N, means, and sample SDs with independent base-R summaries 
 
 ### AI prompt
 
-Create a side-by-side table of each region's published overall crude rate in 2016 and 2024. Preserve the original suppression and unavailable labels, and explain that these endpoints do not describe the full trajectory.
+Align Yukon and Northwest Territories' overall means to years with both sex-specific rates reported, list the calendar years used in Table 1, and retain Prince Edward Island's independently reported overall series. Expand the endpoint comparison to 2016, 2024, and 2025, and organize the report under the M2 example's headings.
 
 ### Verification
 
-Compared the displayed cells directly with the source CSV, including suppressed and unavailable labels.
+Checked matched year sets and recalculated means against the prepared panel; compared endpoint values with the source CSV, including suppression and unavailable labels; confirmed the six report headings match the example.
 
 ### AI prompt
 

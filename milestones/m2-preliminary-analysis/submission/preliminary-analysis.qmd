@@ -2,14 +2,14 @@
 title: "M2: Preliminary Analysis of Reported Opioid Toxicity Death Rates"
 ---
 
-## Questions and audience
+## Question
 
-For provincial and regional public-health readers, we examine how reported
-crude opioid toxicity death rates vary across Canadian jurisdictions and
-years, and whether the male-to-female rate ratio varies. This preliminary
-analysis follows Group 4's PHAC project proposal, using 2016-2025 data.
+How did reported crude opioid toxicity death rates vary across Canadian
+jurisdictions from 2016 to 2025, and how did the male-to-female rate ratio
+vary? This preliminary analysis is intended for provincial and regional
+public-health readers.
 
-## Source and analytic sample
+## Setup
 
 The source is the fixed public aggregate PHAC file at
 `data/SubstanceHarmsData.csv`, identified in the group's intake card as
@@ -130,7 +130,46 @@ kable(
 )
 ```
 
-## Missingness before exclusions
+## Cohort
+
+Nunavut 2023 is retained in the availability audit but excluded from
+summaries because reporting covers only part of that year. To avoid pooling
+the 2025 reporting changes with earlier definitions, the overall and
+sex-specific summaries for British Columbia, Quebec, and Canada use
+2016-2024. These three 2025 rows remain in the availability audit. Other
+jurisdictions retain 2025. This is a conservative summary convention, not a
+claim that all remaining years and jurisdictions have identical ascertainment.
+
+```{r}
+#| label: summary-eligibility
+# AI prompt: Exclude partial-year Nunavut 2023 and the flagged 2025 records
+# for BC, Quebec, and Canada from summaries. Retain the original panel for the
+# availability audit and display exclusions and remaining region-years.
+# Verified: Checked the excluded rows against PHAC notes and the M1 plan.
+
+summary_df <- panel |>
+  filter(!partial_year, !definition_change)
+
+kable(
+  data.frame(
+    Step = c(
+      "Selected region-years",
+      "Partial-year exclusion",
+      "2025 comparability exclusions",
+      "Summary-eligible region-years"
+    ),
+    N = c(
+      nrow(panel),
+      sum(panel$partial_year),
+      sum(panel$definition_change),
+      nrow(summary_df)
+    )
+  ),
+  caption = "Excluded rows are retained in the underlying panel and availability audit."
+)
+```
+
+## Missingness
 
 Suppression and unavailability are kept distinct. Reported zeroes stay zero;
 they are not missing. A ratio requires two reported rates and a positive
@@ -173,65 +212,36 @@ kable(
 )
 ```
 
-## Summary eligibility and exclusions
+## Table 1-style summary
 
-Nunavut 2023 is retained in the availability audit but excluded from the
-summary because reporting covers only part of that year. To avoid pooling
-the 2025 reporting changes with earlier definitions, the overall and
-sex-specific summary for BC, Quebec, and Canada uses 2016-2024.
-
-These three 2025 rows remain in the availability audit. Other jurisdictions
-retain 2025. This is a conservative summary convention, not a claim that
-all remaining years and jurisdictions have identical ascertainment.
-
-```{r}
-#| label: summary-eligibility
-# AI prompt: Create a summary dataset excluding partial-year Nunavut 2023 and
-# the flagged 2025 records for BC, Quebec, and Canada. Retain the original panel
-# for the availability audit and display the number excluded for each reason
-# alongside the number of remaining region-years.
-# Verified: Checked Nunavut 2023 and the three flagged 2025 rows against PHAC notes and the group's M1 plan.
-
-summary_df <- panel |>
-  filter(!partial_year, !definition_change)
-
-kable(
-  data.frame(
-    Step = c(
-      "Selected region-years",
-      "Partial-year exclusion",
-      "2025 comparability exclusions",
-      "Summary-eligible region-years"
-    ),
-    N = c(
-      nrow(panel),
-      sum(panel$partial_year),
-      sum(panel$definition_change),
-      nrow(summary_df)
-    )
-  ),
-  caption = "Excluded rows are retained in the underlying panel and availability audit."
-)
-```
-
-## Table 1: descriptive summary of available annual rates
-
-This aggregate-data Table 1 reports eligible years, available numeric years,
-missing years, and mean (sample SD) by region and measure. It describes
-variation across available years, not individual people.
+This aggregate-data table reports the eligible and numeric years, the
+calendar years used, missing years, and mean (sample SD) by region and
+measure. For Yukon and the Northwest Territories, the overall mean uses only
+years with both male and female rates reported, so the overall and sex-specific
+means cover the same years. Their original overall means appeared lower than
+both sex-specific means because the overall means covered 10 years while the
+sex-specific means used only 5 years in Yukon and 6 in the Northwest
+Territories. These nonmatching periods can produce misleading comparisons.
+Prince Edward Island's overall rate remains summarized independently because
+its overall values are reported even though both sex-specific series are
+suppressed.
 
 Rates are per 100,000 population; the ratio is unitless. Mean annual rates
 are arithmetic summaries, not pooled-period mortality rates. Canada uses
 its own PHAC series; it is never calculated by averaging provincial rates.
-Different availability and summary windows limit comparisons between rows.
+`Years_used` lists the actual years contributing to each mean. Suppressed
+sex-specific rates cannot be recovered from the independently published
+overall rate. A reported zero is not missing; suppressed and unavailable
+values are not zero and are not imputed.
 
 ```{r}
 #| label: table1-and-export
-# AI prompt: Summarize each region and measure using eligible-year N, numeric N,
-# missing N, and mean (sample SD) across available annual values. Handle groups
-# with zero or one numeric value explicitly, round summaries to two decimals,
-# and display and export the same table as table1.csv.
-# Verified: Checked numeric-year N, means, and sample SDs with independent base-R summaries and CSV read-back.
+# AI prompt: Summarize each region and measure with eligible, numeric, and
+# missing years; list the calendar years used and report mean (sample SD).
+# Align Yukon and Northwest Territories' overall means to years with both
+# sex-specific rates reported, but retain PEI's independently reported overall
+# series. Handle zero or one numeric values and export the displayed table.
+# Verified: Checked year sets, means, and sample SDs against the prepared panel.
 
 mean_sd <- function(x) {
   x <- x[!is.na(x)]
@@ -246,18 +256,28 @@ mean_sd <- function(x) {
 }
 
 table1 <- summary_df |>
-  select(Region, Year, all_of(paste0(measures, "_rate"))) |>
+  mutate(both_sex_rates_reported = !is.na(male_rate) & !is.na(female_rate)) |>
+  select(Region, Year, both_sex_rates_reported, all_of(paste0(measures, "_rate"))) |>
   pivot_longer(
     ends_with("_rate"),
     names_to = "Measure",
     values_to = "Rate"
   ) |>
   mutate(Measure = sub("_rate$", "", Measure)) |>
+  filter(
+    !(Measure == "overall" & Region %in% c("Yukon", "Northwest Territories")) |
+      both_sex_rates_reported
+  ) |>
   group_by(Region, Measure) |>
   summarise(
     Eligible_year_N = n(),
     Numeric_N = sum(!is.na(Rate)),
     Missing_N = sum(is.na(Rate)),
+    Years_used = if_else(
+      any(!is.na(Rate)),
+      paste(Year[!is.na(Rate)], collapse = ", "),
+      "None"
+    ),
     Mean_SD = mean_sd(Rate),
     .groups = "drop"
   )
@@ -266,24 +286,28 @@ write_csv(table1, file.path(out_dir, "table1.csv"))
 
 kable(
   table1,
-  caption = "Table 1. Available annual-rate summaries; N counts years, not deaths."
+  caption = "Table 1. Annual-rate summaries; N counts years, not deaths."
 )
 ```
 
-## Preliminary evidence on change
+## Preliminary figure
 
-The table below compares 2016 with 2024, before the flagged 2025 changes.
-Source labels remain visible instead of being replaced by zero.
+### Endpoint comparison
+
+This table compares published overall crude rates in 2016, 2024, and 2025.
+Source labels remain visible instead of being replaced by zero. The 2025
+rates for British Columbia, Quebec, and Canada are flagged because of
+reporting changes; these endpoints do not describe the full trajectory.
 
 ```{r}
 #| label: endpoint-comparison
-# AI prompt: Create a side-by-side table of each region's published overall
-# crude rate in 2016 and 2024. Preserve the original suppression and unavailable
-# labels, and explain that these endpoints do not describe the full trajectory.
-# Verified: Compared the displayed cells directly with the source CSV, including suppressed and unavailable labels.
+# AI prompt: Compare each region's published overall crude rates in 2016,
+# 2024, and 2025. Preserve source suppression and unavailable labels and flag
+# reporting changes without implying endpoints describe the full trajectory.
+# Verified: Compared displayed values with the source CSV and PHAC notes.
 
 endpoints <- panel |>
-  filter(Year %in% c(2016, 2024)) |>
+  filter(Year %in% c(2016, 2024, 2025)) |>
   select(Region, Year, overall_raw) |>
   pivot_wider(
     names_from = Year,
@@ -293,16 +317,18 @@ endpoints <- panel |>
 
 kable(
   endpoints,
-  caption = "Published overall crude rates per 100,000; two endpoints do not show the full trajectory."
+  caption = "Published overall crude rates per 100,000; 2025 reporting changes are flagged in the text."
 )
 ```
 
 In PHAC's Canada series, the reported overall rate is 7.8 in 2016 and 16.2
-in 2024. This does not imply a steady increase in every intervening year.
-For the secondary question, Table 1 summarizes defined annual male-to-female
-ratios; unavailable ratios do not imply equal rates.
+in 2024; its 2025 value has a reporting-change caution. These comparisons do
+not imply a steady increase in every intervening year. The annual figures
+show the intervening values. For the secondary question, Table 1 summarizes
+defined annual male-to-female ratios; unavailable ratios do not imply equal
+rates.
 
-## Figure 1: annual reported crude death rates
+### Figure 1: annual reported crude death rates
 
 Each panel shows a province or territory in blue and PHAC's Canada rate in
 grey. Nunavut 2023 is omitted from the full-year plot. Triangles identify
@@ -385,7 +411,7 @@ ggplot(jurisdictions, aes(x = Year)) +
   )
 ```
 
-## Figure 2: male-to-female rate ratios
+### Figure 2: male-to-female rate ratios
 
 A ratio above 1 means the reported male rate is higher than the female
 rate. Ratios are undefined when either rate is suppressed or unavailable,
@@ -459,7 +485,7 @@ ggplot(jurisdictions, aes(x = Year)) +
   )
 ```
 
-## Methods, limitations, and stewardship
+### Interpretation, limitations, and stewardship
 
 The analysis is descriptive and non-causal. We use PHAC's published crude
 rates without age standardization, imputation, or hypothesis testing.
