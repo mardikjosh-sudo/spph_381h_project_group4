@@ -2227,12 +2227,12 @@ vertical-align: -.125em;
 </header>
 
 
-<section id="questions-and-audience" class="level2">
-<h2 class="anchored" data-anchor-id="questions-and-audience">Questions and audience</h2>
-<p>For provincial and regional public-health readers, we examine how reported crude opioid toxicity death rates vary across Canadian jurisdictions and years, and whether the male-to-female rate ratio varies. This preliminary analysis follows Group 4’s PHAC project proposal, using 2016-2025 data.</p>
+<section id="question" class="level2">
+<h2 class="anchored" data-anchor-id="question">Question</h2>
+<p>How did reported crude opioid toxicity death rates vary across Canadian jurisdictions from 2016 to 2025, and how did the male-to-female rate ratio vary? This preliminary analysis is intended for provincial and regional public-health readers.</p>
 </section>
-<section id="source-and-analytic-sample" class="level2">
-<h2 class="anchored" data-anchor-id="source-and-analytic-sample">Source and analytic sample</h2>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
 <p>The source is the fixed public aggregate PHAC file at <code>data/SubstanceHarmsData.csv</code>, identified in the group’s intake card as the September 22, 2026 release, accessed October 26, 2026.</p>
 <p>One analytic row represents a region-year, not a person or death. We select Opioids, Deaths, By year, 2016-2025, and Crude rate, retaining overall rates and the reported male and female sex categories. Quarterly data, partial 2026 data, other harms, and stimulants are excluded. Canada is a separate reference series, not an additional province.</p>
 <div class="cell">
@@ -2382,41 +2382,101 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 </div>
 </div>
 </section>
-<section id="missingness-before-exclusions" class="level2">
-<h2 class="anchored" data-anchor-id="missingness-before-exclusions">Missingness before exclusions</h2>
+<section id="cohort" class="level2">
+<h2 class="anchored" data-anchor-id="cohort">Cohort</h2>
+<p>Nunavut 2023 is retained in the availability audit but excluded from summaries because reporting covers only part of that year. To avoid pooling the 2025 reporting changes with earlier definitions, the overall and sex-specific summaries for British Columbia, Quebec, and Canada use 2016-2024. These three 2025 rows remain in the availability audit. Other jurisdictions retain 2025. This is a conservative summary convention, not a claim that all remaining years and jurisdictions have identical ascertainment.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># AI prompt: Exclude partial-year Nunavut 2023 and the flagged 2025 records</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># for BC, Quebec, and Canada from summaries. Retain the original panel for the</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># availability audit and display exclusions and remaining region-years.</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Verified: Checked the excluded rows against PHAC notes and the M1 plan.</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>summary_df <span class="ot">&lt;-</span> panel <span class="sc">|&gt;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>partial_year, <span class="sc">!</span>definition_change)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">Step =</span> <span class="fu">c</span>(</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;Selected region-years&quot;</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;Partial-year exclusion&quot;</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;2025 comparability exclusions&quot;</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;Summary-eligible region-years&quot;</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">N =</span> <span class="fu">c</span>(</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">nrow</span>(panel),</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sum</span>(panel<span class="sc">$</span>partial_year),</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sum</span>(panel<span class="sc">$</span>definition_change),</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">nrow</span>(summary_df)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Excluded rows are retained in the underlying panel and availability audit.&quot;</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Excluded rows are retained in the underlying panel and availability audit.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Step</th>
+<th style="text-align: right;">N</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Selected region-years</td>
+<td style="text-align: right;">140</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Partial-year exclusion</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2025 comparability exclusions</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Summary-eligible region-years</td>
+<td style="text-align: right;">136</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="missingness" class="level2">
+<h2 class="anchored" data-anchor-id="missingness">Missingness</h2>
 <p>Suppression and unavailability are kept distinct. Reported zeroes stay zero; they are not missing. A ratio requires two reported rates and a positive female rate. Ratios use rounded published rates and are approximate.</p>
 <p>The denominator below is all 140 selected region-years, including records later excluded from the full-year summary. Missingness is not assumed random.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># AI prompt: Before exclusions, summarize availability of overall, male, female,</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># and ratio values across all selected region-years. Include numeric and missing</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># counts, missing percentages, and separate counts for suppression, unavailable</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># values, and zero denominators. Display and export missingness-summary.csv.</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Verified: Compared all availability categories and percentages with separate base-R counts and the exported CSV.</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>measures <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;overall&quot;</span>, <span class="st">&quot;male&quot;</span>, <span class="st">&quot;female&quot;</span>, <span class="st">&quot;ratio&quot;</span>)</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>missingness <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(<span class="fu">lapply</span>(measures, <span class="cf">function</span>(m) {</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  v <span class="ot">&lt;-</span> panel[[<span class="fu">paste0</span>(m, <span class="st">&quot;_rate&quot;</span>)]]</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> panel[[<span class="fu">paste0</span>(m, <span class="st">&quot;_status&quot;</span>)]]</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">Measure =</span> m,</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">Region_year_N =</span> <span class="fu">nrow</span>(panel),</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">Numeric_N =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(v)),</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">Missing_N =</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(v)),</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">Missing_percent =</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> <span class="fu">mean</span>(<span class="fu">is.na</span>(v)), <span class="dv">1</span>),</span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">Suppressed_N =</span> <span class="fu">sum</span>(s <span class="sc">==</span> <span class="st">&quot;Suppressed&quot;</span>),</span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">Unavailable_N =</span> <span class="fu">sum</span>(s <span class="sc">==</span> <span class="st">&quot;Unavailable&quot;</span>),</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">Zero_denominator_N =</span> <span class="fu">sum</span>(s <span class="sc">==</span> <span class="st">&quot;Zero denominator&quot;</span>)</span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>}))</span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(missingness, <span class="fu">file.path</span>(out_dir, <span class="st">&quot;missingness-summary.csv&quot;</span>))</span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(</span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>  missingness,</span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Availability before summary exclusions; N counts region-years.&quot;</span></span>
-<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># AI prompt: Before exclusions, summarize availability of overall, male, female,</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># and ratio values across all selected region-years. Include numeric and missing</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># counts, missing percentages, and separate counts for suppression, unavailable</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># values, and zero denominators. Display and export missingness-summary.csv.</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Verified: Compared all availability categories and percentages with separate base-R counts and the exported CSV.</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>measures <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;overall&quot;</span>, <span class="st">&quot;male&quot;</span>, <span class="st">&quot;female&quot;</span>, <span class="st">&quot;ratio&quot;</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>missingness <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(<span class="fu">lapply</span>(measures, <span class="cf">function</span>(m) {</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  v <span class="ot">&lt;-</span> panel[[<span class="fu">paste0</span>(m, <span class="st">&quot;_rate&quot;</span>)]]</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">&lt;-</span> panel[[<span class="fu">paste0</span>(m, <span class="st">&quot;_status&quot;</span>)]]</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">Measure =</span> m,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">Region_year_N =</span> <span class="fu">nrow</span>(panel),</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">Numeric_N =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(v)),</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">Missing_N =</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(v)),</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">Missing_percent =</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> <span class="fu">mean</span>(<span class="fu">is.na</span>(v)), <span class="dv">1</span>),</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">Suppressed_N =</span> <span class="fu">sum</span>(s <span class="sc">==</span> <span class="st">&quot;Suppressed&quot;</span>),</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">Unavailable_N =</span> <span class="fu">sum</span>(s <span class="sc">==</span> <span class="st">&quot;Unavailable&quot;</span>),</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">Zero_denominator_N =</span> <span class="fu">sum</span>(s <span class="sc">==</span> <span class="st">&quot;Zero denominator&quot;</span>)</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(missingness, <span class="fu">file.path</span>(out_dir, <span class="st">&quot;missingness-summary.csv&quot;</span>))</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>  missingness,</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Availability before summary exclusions; N counts region-years.&quot;</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <caption>Availability before summary exclusions; N counts region-years.</caption>
@@ -2488,124 +2548,74 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 </div>
 </div>
 </section>
-<section id="summary-eligibility-and-exclusions" class="level2">
-<h2 class="anchored" data-anchor-id="summary-eligibility-and-exclusions">Summary eligibility and exclusions</h2>
-<p>Nunavut 2023 is retained in the availability audit but excluded from the summary because reporting covers only part of that year. To avoid pooling the 2025 reporting changes with earlier definitions, the overall and sex-specific summary for BC, Quebec, and Canada uses 2016-2024.</p>
-<p>These three 2025 rows remain in the availability audit. Other jurisdictions retain 2025. This is a conservative summary convention, not a claim that all remaining years and jurisdictions have identical ascertainment.</p>
+<section id="table-1-style-summary" class="level2">
+<h2 class="anchored" data-anchor-id="table-1-style-summary">Table 1-style summary</h2>
+<p>This aggregate-data table reports the eligible and numeric years, the calendar years used, missing years, and mean (sample SD) by region and measure. For Yukon and the Northwest Territories, the overall mean uses only years with both male and female rates reported, so the overall and sex-specific means cover the same years. Their original overall means appeared lower than both sex-specific means because the overall means covered 10 years while the sex-specific means used only 5 years in Yukon and 6 in the Northwest Territories. These nonmatching periods can produce misleading comparisons. Prince Edward Island’s overall rate remains summarized independently because its overall values are reported even though both sex-specific series are suppressed.</p>
+<p>Rates are per 100,000 population; the ratio is unitless. Mean annual rates are arithmetic summaries, not pooled-period mortality rates. Canada uses its own PHAC series; it is never calculated by averaging provincial rates. <code>Years_used</code> lists the actual years contributing to each mean. Suppressed sex-specific rates cannot be recovered from the independently published overall rate. A reported zero is not missing; suppressed and unavailable values are not zero and are not imputed.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># AI prompt: Create a summary dataset excluding partial-year Nunavut 2023 and</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># the flagged 2025 records for BC, Quebec, and Canada. Retain the original panel</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># for the availability audit and display the number excluded for each reason</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># alongside the number of remaining region-years.</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Verified: Checked Nunavut 2023 and the three flagged 2025 rows against PHAC notes and the group&#39;s M1 plan.</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>summary_df <span class="ot">&lt;-</span> panel <span class="sc">|&gt;</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>partial_year, <span class="sc">!</span>definition_change)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">Step =</span> <span class="fu">c</span>(</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;Selected region-years&quot;</span>,</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;Partial-year exclusion&quot;</span>,</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;2025 comparability exclusions&quot;</span>,</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;Summary-eligible region-years&quot;</span></span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">N =</span> <span class="fu">c</span>(</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">nrow</span>(panel),</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sum</span>(panel<span class="sc">$</span>partial_year),</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sum</span>(panel<span class="sc">$</span>definition_change),</span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>      <span class="fu">nrow</span>(summary_df)</span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Excluded rows are retained in the underlying panel and availability audit.&quot;</span></span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># AI prompt: Summarize each region and measure with eligible, numeric, and</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># missing years; list the calendar years used and report mean (sample SD).</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Align Yukon and Northwest Territories&#39; overall means to years with both</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># sex-specific rates reported, but retain PEI&#39;s independently reported overall</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># series. Handle zero or one numeric values and export the displayed table.</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Verified: Checked year sets, means, and sample SDs against the prepared panel.</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>mean_sd <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> x[<span class="sc">!</span><span class="fu">is.na</span>(x)]</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">length</span>(x)) <span class="fu">return</span>(<span class="st">&quot;Not available&quot;</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(x) <span class="sc">==</span> <span class="dv">1</span>) {</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">sprintf</span>(<span class="st">&quot;%.2f (SD unavailable)&quot;</span>, x))</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;%.2f (%.2f)&quot;</span>, <span class="fu">mean</span>(x), <span class="fu">sd</span>(x))</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>table1 <span class="ot">&lt;-</span> summary_df <span class="sc">|&gt;</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">both_sex_rates_reported =</span> <span class="sc">!</span><span class="fu">is.na</span>(male_rate) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(female_rate)) <span class="sc">|&gt;</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Region, Year, both_sex_rates_reported, <span class="fu">all_of</span>(<span class="fu">paste0</span>(measures, <span class="st">&quot;_rate&quot;</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ends_with</span>(<span class="st">&quot;_rate&quot;</span>),</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">&quot;Measure&quot;</span>,</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">&quot;Rate&quot;</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Measure =</span> <span class="fu">sub</span>(<span class="st">&quot;_rate$&quot;</span>, <span class="st">&quot;&quot;</span>, Measure)) <span class="sc">|&gt;</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span>(Measure <span class="sc">==</span> <span class="st">&quot;overall&quot;</span> <span class="sc">&amp;</span> Region <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;Yukon&quot;</span>, <span class="st">&quot;Northwest Territories&quot;</span>)) <span class="sc">|</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>      both_sex_rates_reported</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Region, Measure) <span class="sc">|&gt;</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">Eligible_year_N =</span> <span class="fu">n</span>(),</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">Numeric_N =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(Rate)),</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">Missing_N =</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(Rate)),</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">Years_used =</span> <span class="fu">if_else</span>(</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>      <span class="fu">any</span>(<span class="sc">!</span><span class="fu">is.na</span>(Rate)),</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste</span>(Year[<span class="sc">!</span><span class="fu">is.na</span>(Rate)], <span class="at">collapse =</span> <span class="st">&quot;, &quot;</span>),</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;None&quot;</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">Mean_SD =</span> <span class="fu">mean_sd</span>(Rate),</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(table1, <span class="fu">file.path</span>(out_dir, <span class="st">&quot;table1.csv&quot;</span>))</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(</span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>  table1,</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Table 1. Annual-rate summaries; N counts years, not deaths.&quot;</span></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
-<caption>Excluded rows are retained in the underlying panel and availability audit.</caption>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Step</th>
-<th style="text-align: right;">N</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Selected region-years</td>
-<td style="text-align: right;">140</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Partial-year exclusion</td>
-<td style="text-align: right;">1</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">2025 comparability exclusions</td>
-<td style="text-align: right;">3</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Summary-eligible region-years</td>
-<td style="text-align: right;">136</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</section>
-<section id="table-1-descriptive-summary-of-available-annual-rates" class="level2">
-<h2 class="anchored" data-anchor-id="table-1-descriptive-summary-of-available-annual-rates">Table 1: descriptive summary of available annual rates</h2>
-<p>This aggregate-data Table 1 reports eligible years, available numeric years, missing years, and mean (sample SD) by region and measure. It describes variation across available years, not individual people.</p>
-<p>Rates are per 100,000 population; the ratio is unitless. Mean annual rates are arithmetic summaries, not pooled-period mortality rates. Canada uses its own PHAC series; it is never calculated by averaging provincial rates. Different availability and summary windows limit comparisons between rows.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># AI prompt: Summarize each region and measure using eligible-year N, numeric N,</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># missing N, and mean (sample SD) across available annual values. Handle groups</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># with zero or one numeric value explicitly, round summaries to two decimals,</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># and display and export the same table as table1.csv.</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Verified: Checked numeric-year N, means, and sample SDs with independent base-R summaries and CSV read-back.</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>mean_sd <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> x[<span class="sc">!</span><span class="fu">is.na</span>(x)]</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">length</span>(x)) <span class="fu">return</span>(<span class="st">&quot;Not available&quot;</span>)</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(x) <span class="sc">==</span> <span class="dv">1</span>) {</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">sprintf</span>(<span class="st">&quot;%.2f (SD unavailable)&quot;</span>, x))</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;%.2f (%.2f)&quot;</span>, <span class="fu">mean</span>(x), <span class="fu">sd</span>(x))</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>table1 <span class="ot">&lt;-</span> summary_df <span class="sc">|&gt;</span></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Region, Year, <span class="fu">all_of</span>(<span class="fu">paste0</span>(measures, <span class="st">&quot;_rate&quot;</span>))) <span class="sc">|&gt;</span></span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ends_with</span>(<span class="st">&quot;_rate&quot;</span>),</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">&quot;Measure&quot;</span>,</span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">&quot;Rate&quot;</span></span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Measure =</span> <span class="fu">sub</span>(<span class="st">&quot;_rate$&quot;</span>, <span class="st">&quot;&quot;</span>, Measure)) <span class="sc">|&gt;</span></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Region, Measure) <span class="sc">|&gt;</span></span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">Eligible_year_N =</span> <span class="fu">n</span>(),</span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">Numeric_N =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(Rate)),</span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">Missing_N =</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(Rate)),</span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">Mean_SD =</span> <span class="fu">mean_sd</span>(Rate),</span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(table1, <span class="fu">file.path</span>(out_dir, <span class="st">&quot;table1.csv&quot;</span>))</span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(</span>
-<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>  table1,</span>
-<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Table 1. Available annual-rate summaries; N counts years, not deaths.&quot;</span></span>
-<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<caption>Table 1. Available annual-rate summaries; N counts years, not deaths.</caption>
+<caption>Table 1. Annual-rate summaries; N counts years, not deaths.</caption>
 <colgroup>
-<col style="width: 30%">
+<col style="width: 18%">
+<col style="width: 5%">
+<col style="width: 11%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 41%">
 <col style="width: 9%">
-<col style="width: 19%">
-<col style="width: 11%">
-<col style="width: 11%">
-<col style="width: 16%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -2614,6 +2624,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <th style="text-align: right;">Eligible_year_N</th>
 <th style="text-align: right;">Numeric_N</th>
 <th style="text-align: right;">Missing_N</th>
+<th style="text-align: left;">Years_used</th>
 <th style="text-align: left;">Mean_SD</th>
 </tr>
 </thead>
@@ -2624,6 +2635,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">13.79 (5.84)</td>
 </tr>
 <tr class="even">
@@ -2632,6 +2644,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">36.05 (12.81)</td>
 </tr>
 <tr class="odd">
@@ -2640,6 +2653,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">25.00 (9.25)</td>
 </tr>
 <tr class="even">
@@ -2648,6 +2662,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">2.67 (0.30)</td>
 </tr>
 <tr class="odd">
@@ -2656,6 +2671,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024</td>
 <td style="text-align: left;">12.98 (4.61)</td>
 </tr>
 <tr class="even">
@@ -2664,6 +2680,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024</td>
 <td style="text-align: left;">48.28 (14.16)</td>
 </tr>
 <tr class="odd">
@@ -2672,6 +2689,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024</td>
 <td style="text-align: left;">30.48 (9.23)</td>
 </tr>
 <tr class="even">
@@ -2680,6 +2698,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024</td>
 <td style="text-align: left;">3.82 (0.52)</td>
 </tr>
 <tr class="odd">
@@ -2688,6 +2707,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024</td>
 <td style="text-align: left;">7.86 (2.47)</td>
 </tr>
 <tr class="even">
@@ -2696,6 +2716,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024</td>
 <td style="text-align: left;">21.19 (6.95)</td>
 </tr>
 <tr class="odd">
@@ -2704,6 +2725,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024</td>
 <td style="text-align: left;">14.54 (4.71)</td>
 </tr>
 <tr class="even">
@@ -2712,6 +2734,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024</td>
 <td style="text-align: left;">2.69 (0.21)</td>
 </tr>
 <tr class="odd">
@@ -2720,6 +2743,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">11.57 (6.27)</td>
 </tr>
 <tr class="even">
@@ -2728,6 +2752,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">18.53 (10.01)</td>
 </tr>
 <tr class="odd">
@@ -2736,6 +2761,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">15.09 (8.11)</td>
 </tr>
 <tr class="even">
@@ -2744,6 +2770,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">1.62 (0.28)</td>
 </tr>
 <tr class="odd">
@@ -2752,6 +2779,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">5.60 (1.44)</td>
 </tr>
 <tr class="even">
@@ -2760,6 +2788,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">8.65 (4.73)</td>
 </tr>
 <tr class="odd">
@@ -2768,6 +2797,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">7.10 (2.95)</td>
 </tr>
 <tr class="even">
@@ -2776,6 +2806,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">1.48 (0.59)</td>
 </tr>
 <tr class="odd">
@@ -2784,6 +2815,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">4.40 (1.73)</td>
 </tr>
 <tr class="even">
@@ -2792,6 +2824,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">6.13 (1.90)</td>
 </tr>
 <tr class="odd">
@@ -2800,6 +2833,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">5.25 (1.63)</td>
 </tr>
 <tr class="even">
@@ -2808,6 +2842,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">1.53 (0.54)</td>
 </tr>
 <tr class="odd">
@@ -2816,6 +2851,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">6</td>
 <td style="text-align: right;">4</td>
+<td style="text-align: left;">2016, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">8.38 (4.49)</td>
 </tr>
 <tr class="even">
@@ -2824,15 +2860,17 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">6</td>
 <td style="text-align: right;">4</td>
+<td style="text-align: left;">2016, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">12.30 (6.41)</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Northwest Territories</td>
 <td style="text-align: left;">overall</td>
-<td style="text-align: right;">10</td>
-<td style="text-align: right;">10</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">6</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: left;">7.82 (4.96)</td>
+<td style="text-align: left;">2016, 2021, 2022, 2023, 2024, 2025</td>
+<td style="text-align: left;">10.42 (4.61)</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Northwest Territories</td>
@@ -2840,6 +2878,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">6</td>
 <td style="text-align: right;">4</td>
+<td style="text-align: left;">2016, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">1.76 (1.27)</td>
 </tr>
 <tr class="odd">
@@ -2848,6 +2887,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">3.79 (0.87)</td>
 </tr>
 <tr class="even">
@@ -2856,6 +2896,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">8.06 (1.37)</td>
 </tr>
 <tr class="odd">
@@ -2864,6 +2905,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">5.89 (0.92)</td>
 </tr>
 <tr class="even">
@@ -2872,6 +2914,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">2.20 (0.51)</td>
 </tr>
 <tr class="odd">
@@ -2880,6 +2923,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">3</td>
 <td style="text-align: right;">6</td>
+<td style="text-align: left;">2016, 2017, 2018</td>
 <td style="text-align: left;">0.00 (0.00)</td>
 </tr>
 <tr class="even">
@@ -2888,6 +2932,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">3</td>
 <td style="text-align: right;">6</td>
+<td style="text-align: left;">2016, 2017, 2018</td>
 <td style="text-align: left;">0.00 (0.00)</td>
 </tr>
 <tr class="odd">
@@ -2896,6 +2941,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">3</td>
 <td style="text-align: right;">6</td>
+<td style="text-align: left;">2016, 2017, 2018</td>
 <td style="text-align: left;">0.00 (0.00)</td>
 </tr>
 <tr class="even">
@@ -2904,6 +2950,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">9</td>
+<td style="text-align: left;">None</td>
 <td style="text-align: left;">Not available</td>
 </tr>
 <tr class="odd">
@@ -2912,6 +2959,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">6.94 (2.06)</td>
 </tr>
 <tr class="even">
@@ -2920,6 +2968,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">18.96 (6.86)</td>
 </tr>
 <tr class="odd">
@@ -2928,6 +2977,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">12.90 (4.43)</td>
 </tr>
 <tr class="even">
@@ -2936,6 +2986,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">2.68 (0.26)</td>
 </tr>
 <tr class="odd">
@@ -2944,6 +2995,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">10</td>
+<td style="text-align: left;">None</td>
 <td style="text-align: left;">Not available</td>
 </tr>
 <tr class="even">
@@ -2952,6 +3004,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">10</td>
+<td style="text-align: left;">None</td>
 <td style="text-align: left;">Not available</td>
 </tr>
 <tr class="odd">
@@ -2960,6 +3013,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">4.68 (1.53)</td>
 </tr>
 <tr class="even">
@@ -2968,6 +3022,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">10</td>
+<td style="text-align: left;">None</td>
 <td style="text-align: left;">Not available</td>
 </tr>
 <tr class="odd">
@@ -2976,6 +3031,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024</td>
 <td style="text-align: left;">2.42 (0.33)</td>
 </tr>
 <tr class="even">
@@ -2984,6 +3040,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024</td>
 <td style="text-align: left;">4.09 (0.70)</td>
 </tr>
 <tr class="odd">
@@ -2992,6 +3049,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024</td>
 <td style="text-align: left;">3.28 (0.47)</td>
 </tr>
 <tr class="even">
@@ -3000,6 +3058,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024</td>
 <td style="text-align: left;">1.70 (0.26)</td>
 </tr>
 <tr class="odd">
@@ -3008,6 +3067,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">13.50 (5.73)</td>
 </tr>
 <tr class="even">
@@ -3016,6 +3076,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">22.16 (11.31)</td>
 </tr>
 <tr class="odd">
@@ -3024,6 +3085,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">17.85 (8.51)</td>
 </tr>
 <tr class="even">
@@ -3032,6 +3094,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: left;">2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">1.57 (0.26)</td>
 </tr>
 <tr class="odd">
@@ -3040,6 +3103,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">5</td>
+<td style="text-align: left;">2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">32.08 (11.29)</td>
 </tr>
 <tr class="even">
@@ -3048,15 +3112,17 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">5</td>
+<td style="text-align: left;">2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">44.92 (14.03)</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Yukon</td>
 <td style="text-align: left;">overall</td>
-<td style="text-align: right;">10</td>
-<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: left;">27.44 (14.03)</td>
+<td style="text-align: left;">2021, 2022, 2023, 2024, 2025</td>
+<td style="text-align: left;">38.52 (10.28)</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Yukon</td>
@@ -3064,6 +3130,7 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">5</td>
+<td style="text-align: left;">2021, 2022, 2023, 2024, 2025</td>
 <td style="text-align: left;">1.51 (0.60)</td>
 </tr>
 </tbody>
@@ -3071,17 +3138,19 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 </div>
 </div>
 </section>
-<section id="preliminary-evidence-on-change" class="level2">
-<h2 class="anchored" data-anchor-id="preliminary-evidence-on-change">Preliminary evidence on change</h2>
-<p>The table below compares 2016 with 2024, before the flagged 2025 changes. Source labels remain visible instead of being replaced by zero.</p>
+<section id="preliminary-figure" class="level2">
+<h2 class="anchored" data-anchor-id="preliminary-figure">Preliminary figure</h2>
+<section id="endpoint-comparison" class="level3">
+<h3 class="anchored" data-anchor-id="endpoint-comparison">Endpoint comparison</h3>
+<p>This table compares published overall crude rates in 2016, 2024, and 2025. Source labels remain visible instead of being replaced by zero. The 2025 rates for British Columbia, Quebec, and Canada are flagged because of reporting changes; these endpoints do not describe the full trajectory.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># AI prompt: Create a side-by-side table of each region&#39;s published overall</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># crude rate in 2016 and 2024. Preserve the original suppression and unavailable</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># labels, and explain that these endpoints do not describe the full trajectory.</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Verified: Compared the displayed cells directly with the source CSV, including suppressed and unavailable labels.</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># AI prompt: Compare each region&#39;s published overall crude rates in 2016,</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 2024, and 2025. Preserve source suppression and unavailable labels and flag</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># reporting changes without implying endpoints describe the full trajectory.</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Verified: Compared displayed values with the source CSV and PHAC notes.</span></span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>endpoints <span class="ot">&lt;-</span> panel <span class="sc">|&gt;</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Year <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">2016</span>, <span class="dv">2024</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Year <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">2016</span>, <span class="dv">2024</span>, <span class="dv">2025</span>)) <span class="sc">|&gt;</span></span>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Region, Year, overall_raw) <span class="sc">|&gt;</span></span>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(</span>
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_from =</span> Year,</span>
@@ -3091,16 +3160,17 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(</span>
 <span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  endpoints,</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Published overall crude rates per 100,000; two endpoints do not show the full trajectory.&quot;</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Published overall crude rates per 100,000; 2025 reporting changes are flagged in the text.&quot;</span></span>
 <span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
-<caption>Published overall crude rates per 100,000; two endpoints do not show the full trajectory.</caption>
+<caption>Published overall crude rates per 100,000; 2025 reporting changes are flagged in the text.</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;">Region</th>
 <th style="text-align: left;">Rate_2016</th>
 <th style="text-align: left;">Rate_2024</th>
+<th style="text-align: left;">Rate_2025</th>
 </tr>
 </thead>
 <tbody>
@@ -3108,80 +3178,94 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 <td style="text-align: left;">Alberta</td>
 <td style="text-align: left;">14.3</td>
 <td style="text-align: left;">24.4</td>
+<td style="text-align: left;">22.9</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">British Columbia</td>
 <td style="text-align: left;">16.6</td>
 <td style="text-align: left;">35.7</td>
+<td style="text-align: left;">32.6</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Canada</td>
 <td style="text-align: left;">7.8</td>
 <td style="text-align: left;">16.2</td>
+<td style="text-align: left;">13.7</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Manitoba</td>
 <td style="text-align: left;">6.7</td>
 <td style="text-align: left;">25.0</td>
+<td style="text-align: left;">15.3</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">New Brunswick</td>
 <td style="text-align: left;">4.5</td>
 <td style="text-align: left;">10.0</td>
+<td style="text-align: left;">9.9</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Newfoundland and Labrador</td>
 <td style="text-align: left;">3.4</td>
 <td style="text-align: left;">8.6</td>
+<td style="text-align: left;">4.9</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Northwest Territories</td>
 <td style="text-align: left;">11.2</td>
 <td style="text-align: left;">15.5</td>
+<td style="text-align: left;">4.4</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Nova Scotia</td>
 <td style="text-align: left;">5.6</td>
 <td style="text-align: left;">6.2</td>
+<td style="text-align: left;">7.0</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Nunavut</td>
 <td style="text-align: left;">0.0</td>
+<td style="text-align: left;">n/a</td>
 <td style="text-align: left;">n/a</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Ontario</td>
 <td style="text-align: left;">6.2</td>
 <td style="text-align: left;">14.0</td>
+<td style="text-align: left;">8.7</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Prince Edward Island</td>
 <td style="text-align: left;">3.4</td>
 <td style="text-align: left;">4.5</td>
+<td style="text-align: left;">7.1</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Quebec</td>
 <td style="text-align: left;">3.2</td>
 <td style="text-align: left;">3.4</td>
+<td style="text-align: left;">6.5</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Saskatchewan</td>
 <td style="text-align: left;">7.3</td>
 <td style="text-align: left;">21.8</td>
+<td style="text-align: left;">18.7</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Yukon</td>
 <td style="text-align: left;">18.2</td>
 <td style="text-align: left;">29.4</td>
+<td style="text-align: left;">29.0</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>In PHAC’s Canada series, the reported overall rate is 7.8 in 2016 and 16.2 in 2024. This does not imply a steady increase in every intervening year. For the secondary question, Table 1 summarizes defined annual male-to-female ratios; unavailable ratios do not imply equal rates.</p>
+<p>In PHAC’s Canada series, the reported overall rate is 7.8 in 2016 and 16.2 in 2024; its 2025 value has a reporting-change caution. These comparisons do not imply a steady increase in every intervening year. The annual figures show the intervening values. For the secondary question, Table 1 summarizes defined annual male-to-female ratios; unavailable ratios do not imply equal rates.</p>
 </section>
-<section id="figure-1-annual-reported-crude-death-rates" class="level2">
-<h2 class="anchored" data-anchor-id="figure-1-annual-reported-crude-death-rates">Figure 1: annual reported crude death rates</h2>
+<section id="figure-1-annual-reported-crude-death-rates" class="level3">
+<h3 class="anchored" data-anchor-id="figure-1-annual-reported-crude-death-rates">Figure 1: annual reported crude death rates</h3>
 <p>Each panel shows a province or territory in blue and PHAC’s Canada rate in grey. Nunavut 2023 is omitted from the full-year plot. Triangles identify the 2025 reporting cautions for BC, Quebec, and Canada; their 2025 points are disconnected from earlier lines. Other 2025 observations remain in the plot. The panels use the same zero-based vertical scale.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># AI prompt: Follow our M1 plan with one panel per province or territory,</span></span>
@@ -3262,8 +3346,8 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 </div>
 </div>
 </section>
-<section id="figure-2-male-to-female-rate-ratios" class="level2">
-<h2 class="anchored" data-anchor-id="figure-2-male-to-female-rate-ratios">Figure 2: male-to-female rate ratios</h2>
+<section id="figure-2-male-to-female-rate-ratios" class="level3">
+<h3 class="anchored" data-anchor-id="figure-2-male-to-female-rate-ratios">Figure 2: male-to-female rate ratios</h3>
 <p>A ratio above 1 means the reported male rate is higher than the female rate. Ratios are undefined when either rate is suppressed or unavailable, or the female rate is zero. Prince Edward Island and Nunavut have no defined ratios in this release. Flagged 2025 points are separated here as a conservative reporting caution, too.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># AI prompt: Plot annual male-to-female rate ratios by province or territory</span></span>
@@ -3340,12 +3424,13 @@ Attaching package: &#39;dplyr&#39;</code></pre>
 </div>
 </div>
 </section>
-<section id="methods-limitations-and-stewardship" class="level2">
-<h2 class="anchored" data-anchor-id="methods-limitations-and-stewardship">Methods, limitations, and stewardship</h2>
+<section id="interpretation-limitations-and-stewardship" class="level3">
+<h3 class="anchored" data-anchor-id="interpretation-limitations-and-stewardship">Interpretation, limitations, and stewardship</h3>
 <p>The analysis is descriptive and non-causal. We use PHAC’s published crude rates without age standardization, imputation, or hypothesis testing. Age structure, small populations, varying reporting coverage, preliminary investigations, and definition changes affect comparability.</p>
 <p>Reported sex categories should not be equated with gender identity. We preserve suppression and do not reconstruct suppressed counts or identify people. These results can support further descriptive investigation, but do not identify causes or establish which policy response would be effective.</p>
 <p>Source: <a href="https://health-infobase.canada.ca/substance-related-harms/opioids-stimulants/">PHAC surveillance release</a>.</p>
 <p>Coverage and reporting cautions: <a href="https://health-infobase.canada.ca/substance-related-harms/opioids-stimulants/technical-notes.html">PHAC technical notes</a>.</p>
+</section>
 </section>
 
 </main>
