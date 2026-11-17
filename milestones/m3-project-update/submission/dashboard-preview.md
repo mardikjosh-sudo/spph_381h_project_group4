@@ -1,0 +1,5 @@
+# Dashboard / KT Preview
+
+- **Current preview:** [Open the rendered report's annual-rate figure](report-draft.html#figure-1-annual-reported-crude-death-rates) and [male-to-female ratio figure](report-draft.html#figure-2-male-to-female-rate-ratios). These code-generated small multiples are the current static dashboard-style draft; the final KT layout is still being refined.
+- **Audience and decision-support feature:** Provincial and regional public-health readers can scan each jurisdiction's annual series beside the grey Canada reference, then use the second figure to inspect the reported sex-rate gap where a ratio is defined. The shared axes and marked 2025 caution points support a consistent first review across regions.
+- **Limitation:** These are crude, aggregate surveillance rates. Suppressed and unavailable values are gaps, not zeroes; 2025 British Columbia, Quebec, and Canada values have reporting-change cautions, and no figure should be used to infer causes or rank service performance. No individual-level information is displayed.
