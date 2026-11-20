@@ -1,5 +1,5 @@
 ---
-title: "M3 Draft: Opioid Toxicity Death Rates Across Canada"
+title: "M3 Draft: Public Health Agency of Canada Surveillance Data: Trends in Apparent Opioid Toxicity Death Rates and Male-to-Female Rate Ratios Across Canada's Provinces and Territories, 2016–2025"
 subtitle: "Descriptive project update for provincial and regional public-health readers"
 format:
   html:
@@ -9,29 +9,28 @@ format:
 
 ## Purpose and audience
 
-This draft is for provincial and regional public-health decision makers. It describes where published apparent opioid toxicity death rates and the reported male-to-female rate gap warrant closer review. It does not identify causes or recommend a specific policy or funding decision.
+This draft is for provincial and regional public-health decision makers. It summarizes PHAC's published rates and highlights patterns that may need local follow-up. It does not explain causes or evaluate policies, services, or funding decisions.
 
 ## Question
 
-How did reported crude opioid toxicity death rates vary across Canadian
-jurisdictions from 2016 to 2025, and how did the male-to-female rate ratio
-vary? This project update presents the current descriptive evidence for provincial and regional public-health readers.
+How did PHAC's published crude annual rates of apparent opioid toxicity deaths vary across Canada's provinces and territories from 2016 to 2025?
+When both male and female rates are available, how did the male-to-female rate ratio vary?
 
 ## Data source and provenance
 
-The analysis uses the Public Health Agency of Canada (PHAC)'s public *Opioid- and Stimulant-related Harms in Canada* surveillance release. The group committed the September 22, 2026 CSV snapshot for a repeatable analysis and accessed it on October 26, 2026. Definitions, reporting changes and coverage follow [PHAC technical notes](https://health-infobase.canada.ca/substance-related-harms/opioids-stimulants/technical-notes.html). The source contains aggregate surveillance values; one analytic row below represents a region and year.
+The analysis uses PHAC's public *Opioid- and Stimulant-related Harms in Canada* release.
+We use the September 22, 2026 CSV snapshot, accessed October 26, 2026.
+PHAC's [technical notes](https://health-infobase.canada.ca/substance-related-harms/opioids-stimulants/technical-notes.html) describe the definitions, reporting changes, and coverage.
+The data are aggregate surveillance values, not individual records.
 
 ## Setup
 
-The source is the fixed public aggregate PHAC file at
-`data/SubstanceHarmsData.csv`, identified in the group's intake card as
-the September 22, 2026 release, accessed October 26, 2026.
-
-One analytic row represents a region-year, not a person or death.
-We select Opioids, Deaths, By year, 2016-2025, and Crude rate, retaining
-overall rates and the reported male and female sex categories.
-Quarterly data, partial 2026 data, other harms, and stimulants are excluded.
-Canada is a separate reference series, not an additional province.
+The fixed source file is `data/SubstanceHarmsData.csv`.
+Each analysis record represents one jurisdiction in one year, not a person or a death.
+We select annual crude rates for opioid deaths from 2016 through 2025, including overall rates and rates reported for males and females.
+Crude rates are not adjusted for age.
+We exclude quarterly data, partial 2026 data, and records about other substances.
+Canada is PHAC's national reference series, not an additional province or territory.
 
 ```{r}
 #| label: prepare-region-year-data
@@ -143,24 +142,24 @@ kable(
     ),
     N = c(nrow(source_df), nrow(selected), nrow(panel))
   ),
-  caption = "Selection flow: three rate records become one region-year."
+  caption = "Selection flow: three rate records (overall, male, and female) form one jurisdiction-year."
 )
 ```
 
 ## Methods: selection and exclusions
 
-The inclusion rules and the exceptions below were set before interpreting the figures.
+The inclusion rules and exceptions below were set before interpreting the figures.
 
 ## Cohort
 
-Table 1 uses the common calendar window 2016–2024 for every region. The
-2025 values remain in the availability audit, endpoint table, and annual
-figures, but not in Table 1: British Columbia, Quebec, and Canada have
-2025 reporting changes, so including that year for only some regions
-would weaken comparisons. Nunavut 2023 is also excluded from Table 1
-because reporting covers only part of that year. A common window does
-not create complete data: the table shows the number of reported years
-separately for each region and measure.
+Table 1 uses the same calendar years, 2016–2024, for every jurisdiction.
+We leave 2025 out of the table because PHAC notes reporting changes for British Columbia, Quebec, and Canada that year.
+We still show 2025 in the availability audit, endpoint table, and annual figures, with a caution.
+These 2025 values are not a like-for-like continuation of earlier years.
+In British Columbia, overall data include ongoing investigations involving all unregulated drugs, while sex-specific data cover completed opioid-toxicity investigations.
+Quebec's 2025 data include presumed drug poisonings still under investigation.
+We also exclude Nunavut 2023 because it covers only part of the year.
+Even with a common time window, some values are suppressed or unavailable; Table 1 shows the number of contributing years in each cell.
 
 ```{r}
 #| label: summary-eligibility
@@ -197,12 +196,12 @@ kable(
 
 ## Missingness
 
-Suppression and unavailability are kept distinct. Reported zeroes stay zero;
-they are not missing. A ratio requires two reported rates and a positive
-female rate. Ratios use rounded published rates and are approximate.
-
-The denominator below is all 140 selected region-years, including 2025
-and records excluded from Table 1. Missingness is not assumed random.
+We keep suppressed and unavailable values missing; we do not treat them as zero or estimate them.
+A published zero remains zero.
+We calculate a male-to-female ratio only when both rates are reported and the female rate is above zero.
+Because PHAC publishes rounded rates, the ratios are approximate.
+The availability summary covers all 140 selected jurisdiction-years, including 2025 and years later excluded from Table 1.
+We do not know whether years with missing values differ systematically from years with reported values, so the summaries describe only the available data.
 
 ```{r}
 #| label: missingness-and-export
@@ -240,26 +239,22 @@ kable(
 
 ## Table 1: compact regional summary
 
-We checked the available annual overall, female, male, and ratio values
-for every region before selecting 2016–2024 as the common Table 1
-window. Most regions have nine reported years for all four measures.
-Within this window, Yukon has four reported female, male, and ratio
-years; the Northwest Territories has five. Their published overall
-series have nine years, but the Table 1 overall means are restricted to
-the same four and five years, respectively, so within-region means
-cover matched years. Prince Edward Island has no reported sex-specific
-rates or defined ratios. Nunavut has three reported full-year values
-for the first three measures, all in 2016–2018, and no defined ratios.
-These differences appear as `n` in each cell. An overall rate is
-published independently and cannot reveal suppressed sex-specific rates.
+Table 1 summarizes annual rates available in 2016–2024.
+Most jurisdictions have nine years of reported data for each measure.
+In Yukon, both male and female rates are reported in four years; in the Northwest Territories, both are reported in five years.
+The overall means for these territories use those same years.
+PHAC suppresses Prince Edward Island's male and female rates, so no ratio can be calculated.
+Nunavut has reported full-year overall, male, and female rates only for 2016–2018; all are zero.
+The female rate of zero means no ratio can be calculated for those years, and the other years have no usable sex-specific rates.
+An overall rate is published separately and cannot reveal suppressed male or female rates.
+The `n` in each cell is the number of years included in that summary.
 
-Each cell gives mean (sample SD) across included annual values and the
-number of contributing years. Rates are crude deaths per 100,000;
-the ratio is unitless and calculated from rounded published rates.
-These arithmetic means are not pooled-period mortality rates.
-Canada is PHAC's separate national series, never an average of
-provincial rates. Suppressed and unavailable values are not imputed;
-reported zeroes are retained.
+Each cell gives the mean and sample standard deviation (SD) of the available annual values.
+The SD describes how much those annual values vary.
+Rates are crude deaths per 100,000 people.
+The male-to-female ratio is each year's male rate divided by its female rate; it has no unit and is approximate because PHAC's published rates are rounded.
+These are averages of annual rates, not pooled rates for the full period.
+Canada's row is PHAC's national series, not an average of provincial and territorial rates.
 
 ```{r}
 #| label: table1-and-export
@@ -326,7 +321,7 @@ write_csv(table1, file.path(out_dir, "table1.csv"))
 
 kable(
   table1,
-  caption = "Table 1. Mean (sample SD); n = contributing years within 2016–2024. Nunavut 2023 is excluded as a partial year. Yukon and Northwest Territories overall means use only years with both sex-specific rates reported (n = 4 and 5) for within-region alignment. Other n differences reflect suppression or unavailability. Rates are crude deaths per 100,000; the ratio is unitless."
+  caption = "Table 1. Mean (sample SD) of annual values; n = number of contributing years in 2016–2024. Nunavut 2023 is excluded because it covers only part of the year. Yukon and Northwest Territories overall means use only years when both male and female rates are reported (n = 4 and 5), so the measures cover the same years. Other n differences reflect suppressed or unavailable values. Rates are crude deaths per 100,000 people."
 )
 ```
 
@@ -334,10 +329,10 @@ kable(
 
 ### Endpoint comparison
 
-This table compares published overall crude rates in 2016, 2024, and 2025.
-Source labels remain visible instead of being replaced by zero. The 2025
-rates for British Columbia, Quebec, and Canada are flagged because of
-reporting changes; these endpoints do not describe the full trajectory.
+This table compares PHAC's published overall crude rates in 2016, 2024, and 2025.
+Suppressed and unavailable labels remain as published; they are not changed to zero.
+We flag the 2025 values for British Columbia, Quebec, and Canada because reporting changed.
+These three years do not show the full path between 2016 and 2025.
 
 ```{r}
 #| label: endpoint-comparison
@@ -361,26 +356,26 @@ kable(
 )
 ```
 
-In PHAC's Canada series, the reported overall rate is 7.8 in 2016 and 16.2
-in 2024; its 2025 value has a reporting-change caution. This is a clear endpoint difference in the published national crude rates, not proof of a monotonic rise or a population-adjusted effect. These comparisons do
-not imply a steady increase in every intervening year. The annual figures
-show the intervening values. For the secondary question, Table 1 summarizes
-defined annual male-to-female ratios; unavailable ratios do not imply equal
-rates.
+PHAC reported a Canada crude rate of 7.8 deaths per 100,000 people in 2016 and 16.2 in 2024.
+The rate was higher at the 2024 endpoint, but these two values do not show whether it increased every year or explain why it changed.
+The annual figure shows the intervening years.
+The 2025 Canada value is also shown with a reporting-change caution.
+Table 1 summarizes male-to-female ratios only when both rates are available and the female rate is above zero.
+A missing ratio does not mean the rates were equal.
 
 ### Figure 1: annual reported crude death rates
 
-Each panel shows a province or territory in blue and PHAC's Canada rate in
-grey. Nunavut 2023 is omitted from the full-year plot. Triangles identify
-the 2025 reporting cautions for BC, Quebec, and Canada; their 2025 points
-are disconnected from earlier lines. Other 2025 observations remain in the
-plot. The panels use the same zero-based vertical scale.
+Each panel shows one province or territory in blue; the grey line shows PHAC's Canada reference rate.
+The panels share a vertical scale that starts at zero.
+Nunavut 2023 is omitted because it covers only part of the year.
+Triangles mark 2025 values with reporting cautions for British Columbia, Quebec, and Canada.
+Those points are not connected to earlier years, so the chart does not suggest they are directly comparable.
 
 ```{r}
 #| label: figure-overall-rates
 #| fig-width: 10
 #| fig-height: 11
-#| fig-cap: "Annual published crude death rates per 100,000. Blue: jurisdiction; grey: PHAC Canada reference. Gaps preserve suppressed, unavailable, or partial-year data. Triangles mark 2025 reporting cautions; recent data may be revised."
+#| fig-cap: "PHAC's annual published crude rates of apparent opioid toxicity deaths per 100,000 people. Blue: province or territory; grey: Canada reference. Gaps indicate suppressed, unavailable, or excluded partial-year data. Triangles mark 2025 reporting cautions."
 # AI prompt: Follow our M1 plan with one panel per province or territory,
 # blue annual crude-rate trends, and a grey PHAC Canada reference. Preserve gaps,
 # omit partial-year Nunavut 2023, and show flagged 2025 values as disconnected
@@ -453,17 +448,16 @@ ggplot(jurisdictions, aes(x = Year)) +
 
 ### Figure 2: male-to-female rate ratios
 
-A ratio above 1 means the reported male rate is higher than the female
-rate. Ratios are undefined when either rate is suppressed or unavailable,
-or the female rate is zero. Prince Edward Island and Nunavut have no
-defined ratios in this release. Flagged 2025 points are separated here
-as a conservative reporting caution, too.
+A ratio above 1 means the reported male rate is higher than the female rate.
+We do not calculate a ratio if either rate is suppressed or unavailable, or if the female rate is zero.
+No ratio is available for Prince Edward Island or Nunavut in this release.
+The 2025 values with reporting cautions are shown separately here as well.
 
 ```{r}
 #| label: figure-sex-ratios
 #| fig-width: 10
 #| fig-height: 11
-#| fig-cap: "Male-to-female crude-rate ratios calculated from rounded published rates. The dashed line marks equal reported rates. Gaps and absent ratios do not imply equality. Reported sex categories are not gender identity."
+#| fig-cap: "Male-to-female ratios calculated from PHAC's rounded crude rates. The dashed line marks equal reported rates. Gaps and missing ratios do not mean the rates were equal. PHAC's reported sex categories are not measures of gender identity."
 # AI prompt: Plot annual male-to-female rate ratios by province or territory
 # using common zero-based axes and a dashed reference at 1. Preserve gaps and
 # disconnected flagged 2025 points, label panels with no defined ratios, and
@@ -527,16 +521,13 @@ ggplot(jurisdictions, aes(x = Year)) +
 
 ### Interpretation, limitations, and stewardship
 
-The analysis is descriptive and non-causal. We use PHAC's published crude
-rates without age standardization, imputation, or hypothesis testing.
-Age structure, small populations, varying reporting coverage, preliminary
-investigations, and definition changes affect comparability.
+This is a descriptive analysis, not a causal study.
+PHAC's crude rates are not adjusted for age.
+Comparisons can also be affected by population size, reporting coverage, investigations that are still underway, and changes in how deaths are counted.
 
-Reported sex categories should not be equated with gender identity.
-We preserve suppression and do not reconstruct suppressed counts or
-identify people. These results can support further descriptive
-investigation, but do not identify causes or establish which policy
-response would be effective.
+PHAC's reported male and female categories are not the same as gender identity.
+We leave suppressed values missing; we do not estimate hidden counts or identify individuals.
+These results can help identify questions for further study, but they do not explain causes or show which policy response would work.
 
 Source: [PHAC surveillance release](https://health-infobase.canada.ca/substance-related-harms/opioids-stimulants/).
 
@@ -544,17 +535,29 @@ Coverage and reporting cautions: [PHAC technical notes](https://health-infobase.
 
 ## What the current evidence means for the audience
 
-The stable finding for this draft is that PHAC's published Canada crude rate was higher in 2024 than in 2016 (16.2 versus 7.8 deaths per 100,000). The jurisdiction panels show substantial variation in reported rates and missingness. For a briefing, the figures help identify which regional patterns deserve closer source review and survey or demographic context. They do not justify a ranking of services or a causal explanation.
+The main finding is that PHAC reported a higher Canada crude rate in 2024 than in 2016 (16.2 versus 7.8 deaths per 100,000 people).
+The panels show that reported rates and data availability vary across jurisdictions.
+For a briefing, the figures can help identify patterns for local review alongside information about age structure and reporting practices.
+They cannot explain causes or be used to rank services.
 
-The decision needing feedback is whether thirteen small panels plus a Canada reference are readable for this audience, and whether the reporting cautions are prominent enough beside the 2025 observations. The male-to-female figure is secondary because several territorial or provincial ratios are undefined in the public release.
+We need feedback on whether the 13 province-and-territory panels and the Canada reference are easy to read, and whether the 2025 cautions are prominent enough.
+The male-to-female figure is secondary because some jurisdictions have no ratio that can be calculated from the published data.
 
 ## Limitations and next step
 
-The rates are crude, and comparisons may reflect age structure, population size, case definitions, investigation delays and reporting coverage. Recent observations can be revised. Suppressed or unavailable entries are kept missing, and the male-to-female ratio uses rounded source rates where both values are available and the female denominator is positive. The source's reported sex categories are not measures of gender identity. We will seek peer feedback on visual clarity, comparability and the placement of these cautions before finalizing the KT product.
+The rates are crude and are not adjusted for age.
+Comparisons may also reflect population size, differences in how deaths are classified, investigation delays, or reporting coverage.
+Recent values may change as investigations are completed.
+We keep suppressed or unavailable values missing.
+Ratios use rounded source rates and are shown only when both rates are available and the female rate is above zero.
+PHAC's reported male and female categories are not measures of gender identity.
+We will use peer feedback to improve the figures and the placement of cautions before finalizing the knowledge-translation product.
 
 ## Reproducibility and AI audit
 
-Render from the repository root with `quarto render milestones/m3-project-update/submission/report-draft.qmd`. The source reads the fixed CSV at `data/SubstanceHarmsData.csv` and generates the displayed tables, figures, and two CSV outputs. The methods and AI audit for the underlying analysis are in the M2 submission; the M3 AI-use note records the drafting work completed during M3.
+To recreate the report, run `quarto render milestones/m3-project-update/submission/report-draft.qmd` from the repository root.
+The source reads the fixed CSV at `data/SubstanceHarmsData.csv` and generates the tables, figures, and two CSV outputs.
+The M2 submission documents the analysis methods; the M3 AI-use note describes AI assistance and how this draft was checked.
 
 ## Source
 
